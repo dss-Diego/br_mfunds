@@ -173,7 +173,7 @@ def update_cdi():
             i += 1
         cdi = pd.DataFrame.from_dict(cdi, orient='index')
         cdi['cdi'] = cdi['cdi']/100
-        cdi['d_factor'] = ((cdi['cdi']/100)+1)**(1/250)
+        cdi['d_factor'] = ((cdi['cdi']/100)+1)**(1/252)
         cdi.to_sql('cdi', conn, if_exists='append', index=False)
         new_files.to_sql('files', conn, if_exists='append', index=False)
     return
@@ -186,9 +186,5 @@ def update_pipeline():
     return
 #%% 
 update_pipeline()
-
-
-
-    
 
 
