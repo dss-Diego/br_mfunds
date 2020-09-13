@@ -1,4 +1,3 @@
-*.csv
-*.db
-*.xlsx
-*.txt
+data/
+tests.py
+my_funds.py
