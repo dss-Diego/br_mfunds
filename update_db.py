@@ -16,6 +16,12 @@ import datetime
 import zipfile
 
 cwd = os.getcwd()
+if not os.path.exists('data'):
+    os.makedirs('data')
+if not os.path.exists('data\\b3_data'):
+    os.makedirs('data\\b3_data')
+if not os.path.exists('data\\temp'):
+    os.makedirs('data\\temp')    
 conn = sqlite3.connect(cwd + '\\data\\fundos.db')
 db = conn.cursor()
 
@@ -228,7 +234,7 @@ def update_pipeline():
     update_quotes()
     update_cdi()
     return
-#%% 
-update_pipeline()
+
+
 
 

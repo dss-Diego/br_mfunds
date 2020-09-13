@@ -1,3 +1,4 @@
 data/
 tests.py
 my_funds.py
+__pycache__/
