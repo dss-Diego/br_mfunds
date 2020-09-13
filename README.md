@@ -17,10 +17,11 @@ All the results of this script are for information purposes and are not intended
 * CDI (Certificado de Depósito Interbancário) - Brazilian reference rate
 * CNPJ (Cadastro Nacional de Pessoa Jurídica) - Brazilian tax ID
 * IBOV - Bovespa Index
+* CVM - Comissão de Valores Mobiliários
 
 ## How to run the script
 Be aware that the first time you run this script, all data regarding investment funds will be downloaded, which takes some time.
-The next time you run the script it will update the database with only new or updated data. **Often, existing data is updated by the CVM.**
+The next time you run the script it will update the database with only new or updated data. **Often, existing past data is updated by the CVM.**
 
 1. Clone the repository `git clone https://github.com/dss-Diego/br_mfunds.git`
 
@@ -38,8 +39,8 @@ ie.:
 
 `gti_id = get_fund_id()`
 
-In the prompt type 'gti dimona brasil' then select 1
-![get fund id](/get_fund_id.img.png)
+In the prompt type `gti dimona brasil` then select `1`
+![get fund id](/get_fund_id_img.png)
 
 The string '09.143.435/0001-60' will be assigned to the variable gti_id.
 
@@ -55,7 +56,7 @@ Parameter fund_id can be:
 * string 'cdi'
 * string 'ibov'
 
-gti_returns = get_returns(fund_id=gti_id, start='all', end='all')
+`gti_returns = get_returns(fund_id=gti_id, start='all', end='all')`
 
 ### fund_performance(fund_id, start='all', end='all', benchmark='cdi', plot=True)
 Creates two dataframes, one with the accumulated returns and the second with the performance table of the fund.
@@ -89,8 +90,10 @@ Forces that the start date is set to a date when all funds have quotas available
 
 `acc_returns, details = compare(fund_ids=funds, start='2014-01-01', end='all', benchmark='ibov', best_start_date=False, plot=True)`
 
+#### Plot with 'best_start_date=False':
 ![compare returns false best date](/compare_returns_false_best_date_fig.png)
 
 `acc_returns, details = compare(fund_ids=funds, start='2014-01-01', end='all', benchmark='ibov', best_start_date=True, plot=True)`
 
+#### Plot with 'best_start_date=True'
 ![compare returns true best date](/compare_returns_true_best_date_fig.png)
