@@ -21,6 +21,14 @@ db = conn.cursor()
 
 #%% functions
 def create_tables():
+    """
+    Creates all tables in the database.
+
+    Returns
+    -------
+    None.
+
+    """
     db.execute("""CREATE TABLE IF NOT EXISTS files
                    (file_name TEXT,
                     last_modified DATE)""")
@@ -40,7 +48,15 @@ def create_tables():
                     cdi REAL,
                     d_factor REAL)""")
                    
-def update_inf_cadastral():
+def update_register():
+    """
+    Updates the mutual funds register.
+
+    Returns
+    -------
+    None.
+
+    """
     url = 'http://dados.cvm.gov.br/dados/FI/CAD/DADOS/'
     files = {}
     i = 0 
@@ -70,7 +86,15 @@ def update_inf_cadastral():
     df.to_sql('inf_cadastral', conn, if_exists='append', index=False)
     return
 
-def update_quotas():
+def update_quotes():
+    """
+    Updates the mutual funds quotes.
+
+    Returns
+    -------
+    None.
+
+    """
     for fl in os.listdir(cwd+'\\data\\temp\\'):
         os.remove(cwd+'\\data\\temp\\'+fl)
     db_files = pd.read_sql("SELECT * FROM files", conn)
@@ -116,6 +140,18 @@ def update_quotas():
     return
     
 def load_file(file_name):
+    """
+    Loads the file with the new quotes.
+
+    Parameters
+    ----------
+    file_name : string
+
+    Returns
+    -------
+    None.
+
+    """
     if file_name[-4:] == '.zip':
         with zipfile.ZipFile(file_name, 'r') as zip_ref:
             zip_ref.extractall(path=cwd+'\\data\\temp\\')
@@ -135,6 +171,14 @@ def load_file(file_name):
     return
 
 def update_cdi():
+    """
+    Updates the CDI (Brazilian reference rate).
+
+    Returns
+    -------
+    None.
+
+    """
     # Files in the ftp:
     url = 'ftp://ftp.cetip.com.br/MediaCDI/'
     req = urllib.request.Request(url)
@@ -180,8 +224,8 @@ def update_cdi():
 
 def update_pipeline():
     create_tables()
-    update_inf_cadastral()
-    update_quotas()
+    update_register()
+    update_quotes()
     update_cdi()
     return
 #%% 
