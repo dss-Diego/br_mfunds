@@ -2,3 +2,4 @@ data/
 tests.py
 my_funds.py
 __pycache__/
+.idea/
