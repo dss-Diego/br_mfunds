@@ -21,11 +21,12 @@ if not os.path.exists('data'):
 if not os.path.exists('data\\b3_data'):
     os.makedirs('data\\b3_data')
 if not os.path.exists('data\\temp'):
-    os.makedirs('data\\temp')    
+    os.makedirs('data\\temp')
 conn = sqlite3.connect(cwd + '\\data\\fundos.db')
 db = conn.cursor()
 
-#%% functions
+
+# %% functions
 def create_tables():
     """
     Creates all tables in the database.
@@ -53,7 +54,8 @@ def create_tables():
                    (date DATE,
                     cdi REAL,
                     d_factor REAL)""")
-                   
+
+
 def update_register():
     """
     Updates the mutual funds register.
@@ -65,7 +67,7 @@ def update_register():
     """
     url = 'http://dados.cvm.gov.br/dados/FI/CAD/DADOS/'
     files = {}
-    i = 0 
+    i = 0
     html = urlopen(url)
     soup = BeautifulSoup(html, 'lxml')
     table = soup.find('table')
@@ -76,14 +78,14 @@ def update_register():
             last_modified = pd.to_datetime(t.text[29:45])
             files[i] = {'file_name': file_name, 'url_date': last_modified}
             i += 1
-    available_files = pd.DataFrame.from_dict(files, orient='index')  
+    available_files = pd.DataFrame.from_dict(files, orient='index')
     available_files['url_date'] = pd.to_datetime(available_files['url_date'])
     last_file = available_files['file_name'][available_files['url_date'] == max(available_files['url_date'])].values[0]
     file_url = f"http://dados.cvm.gov.br/dados/FI/CAD/DADOS/{last_file}"
-    for file in os.listdir(cwd+'\\data\\temp\\'):
-        os.remove(cwd+f'\\data\\temp\\{file}')
-    file_name = wget.download(file_url, cwd+'\\data\\temp\\')
-    df = pd.read_csv(cwd+'\\data\\temp\\'+last_file, sep=';', header=0, encoding='latin-1')
+    for file in os.listdir(cwd + '\\data\\temp\\'):
+        os.remove(cwd + f'\\data\\temp\\{file}')
+    wget.download(file_url, cwd + '\\data\\temp\\')
+    df = pd.read_csv(cwd + '\\data\\temp\\' + last_file, sep=';', header=0, encoding='latin-1')
     df.columns = df.columns.str.lower()
     df = df.rename(columns={'cnpj_fundo': 'cnpj'})
     df = df[['cnpj', 'denom_social', 'classe', 'rentab_fundo', 'taxa_perfm', 'taxa_adm']]
@@ -91,6 +93,7 @@ def update_register():
     db.execute("DELETE FROM inf_cadastral")
     df.to_sql('inf_cadastral', conn, if_exists='append', index=False)
     return
+
 
 def update_quotes():
     """
@@ -101,13 +104,14 @@ def update_quotes():
     None.
 
     """
-    for fl in os.listdir(cwd+'\\data\\temp\\'):
-        os.remove(cwd+'\\data\\temp\\'+fl)
+    for fl in os.listdir(cwd + '\\data\\temp\\'):
+        os.remove(cwd + '\\data\\temp\\' + fl)
     db_files = pd.read_sql("SELECT * FROM files", conn)
     db_files['last_modified'] = pd.to_datetime(db_files['last_modified'])
-    urls = ['http://dados.cvm.gov.br/dados/FI/DOC/INF_DIARIO/DADOS/HIST/', 'http://dados.cvm.gov.br/dados/FI/DOC/INF_DIARIO/DADOS/']
+    urls = ['http://dados.cvm.gov.br/dados/FI/DOC/INF_DIARIO/DADOS/HIST/',
+            'http://dados.cvm.gov.br/dados/FI/DOC/INF_DIARIO/DADOS/']
     files = {}
-    i = 0   
+    i = 0
     for url in urls:
         html = urlopen(url)
         soup = BeautifulSoup(html, 'lxml')
@@ -127,7 +131,7 @@ def update_quotes():
     new_files = available_files.merge(db_files, how='left', right_on='file_name', left_on='file_name')
     new_files = new_files.fillna(pd.to_datetime('1900-01-01'))
     new_files = new_files[new_files['url_date'] > new_files['last_modified']]
-    os.chdir(cwd+'\\data\\temp')
+    os.chdir(cwd + '\\data\\temp')
     for idx, file in new_files.iterrows():
         if len(file['file_name']) == 22:
             url = 'http://dados.cvm.gov.br/dados/FI/DOC/INF_DIARIO/DADOS/HIST/'
@@ -144,7 +148,8 @@ def update_quotes():
         conn.commit()
     os.chdir(cwd)
     return
-    
+
+
 def load_file(file_name):
     """
     Loads the file with the new quotes.
@@ -160,10 +165,10 @@ def load_file(file_name):
     """
     if file_name[-4:] == '.zip':
         with zipfile.ZipFile(file_name, 'r') as zip_ref:
-            zip_ref.extractall(path=cwd+'\\data\\temp\\')
-        os.remove(cwd+'\\data\\temp\\'+file_name)
-    for fl in os.listdir(cwd+'\\data\\temp\\'):
-        df = pd.read_csv(cwd+'\\data\\temp\\'+fl, sep = ';', header = 0, encoding = 'latin-1')
+            zip_ref.extractall(path=cwd + '\\data\\temp\\')
+        os.remove(cwd + '\\data\\temp\\' + file_name)
+    for fl in os.listdir(cwd + '\\data\\temp\\'):
+        df = pd.read_csv(cwd + '\\data\\temp\\' + fl, sep=';', header=0, encoding='latin-1')
         df.columns = df.columns.str.lower()
         df = df.rename(columns={'cnpj_fundo': 'cnpj', 'dt_comptc': 'date', 'vl_quota': 'quota'})
         df = df[['cnpj', 'date', 'quota']]
@@ -173,8 +178,9 @@ def load_file(file_name):
                        WHERE SUBSTR(date, 1, 4) = '{year}' AND 
                              SUBSTR(date, 6, 2) = '{month}'""")
         df.to_sql('quotas', conn, if_exists='append', index=False)
-        os.remove(cwd+'\\data\\temp\\'+fl)
+        os.remove(cwd + '\\data\\temp\\' + fl)
     return
+
 
 def update_cdi():
     """
@@ -199,34 +205,31 @@ def update_cdi():
     for file_name in text:
         if file_name[-4:] == '.txt':
             available_files.append(file_name)
+
     # Files in the database:
     db_files = pd.read_sql("SELECT * FROM files", conn)
     db_files = db_files['file_name'].to_list()
+
     # check if the file is new, process and update files table
-    new_files = {}
-    i = 0
     for file in available_files:
         if file not in db_files:
-            new_files[i] = {'file_name': file, 'last_modified': '1900-01-01'}
             file_url = f"ftp://ftp.cetip.com.br/MediaCDI/{file}"
-            file_name = wget.download(file_url, cwd+f'\\data\\b3_data\\{file}')
-            print("CDI file "+file+" downloaded successfully.")
-            i += 1
-    new_files = pd.DataFrame.from_dict(new_files, orient='index')
-    if len(new_files) > 0:
-        cdi = {}
-        i = 0
-        for file in new_files['file_name']:
-            content = open(cwd+'\\data\\b3_data\\'+file, 'r')
+            wget.download(file_url, cwd + f'\\data\\b3_data\\{file}')
+            content = open(cwd + '\\data\\b3_data\\' + file, 'r')
+            cdi = int(content.readline()) / 100
+            d_factor = ((cdi / 100) + 1) ** (1 / 252)
             date = datetime.datetime.strptime(file[:8], '%Y%m%d')
-            cdi[i] = {'date': date, 'cdi': int(content.readline())}
-            i += 1
-        cdi = pd.DataFrame.from_dict(cdi, orient='index')
-        cdi['cdi'] = cdi['cdi']/100
-        cdi['d_factor'] = ((cdi['cdi']/100)+1)**(1/252)
-        cdi.to_sql('cdi', conn, if_exists='append', index=False)
-        new_files.to_sql('files', conn, if_exists='append', index=False)
+            db.execute(f"""INSERT INTO cdi 
+                            VALUES ('{date}', {cdi}, {d_factor})""")
+
+            # These files are not updated by the provider (cetip.com.br).
+            # Because of that, the last_modified is not important, and set to 1900-01-01
+            db.execute(f"""INSERT INTO files 
+                            VALUES ('{file}', '1900-01-01')""")
+            conn.commit()
+            print("CDI file " + file + " downloaded successfully.")
     return
+
 
 def update_pipeline():
     create_tables()
