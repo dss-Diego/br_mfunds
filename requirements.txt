@@ -1,5 +1,4 @@
 pandas
-sqlite3
 pandas_datareader
 numpy
 seaborn
@@ -7,5 +6,4 @@ fuzzywuzzy
 matplotlib
 wget
 bs4
-zipfile
 python-Levenshtein
