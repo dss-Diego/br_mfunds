@@ -7,3 +7,4 @@ matplotlib
 wget
 bs4
 python-Levenshtein
+requests

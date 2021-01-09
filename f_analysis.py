@@ -18,10 +18,11 @@ import update_db
 pd.set_option('display.width', 400)
 pd.set_option('display.max_columns', 10)
 
-cwd = os.getcwd()
-conn = sqlite3.connect(cwd + '\\data\\fundos.db')
+
+conn = sqlite3.connect(os.path.join('data', 'fundos.db'))
 db = conn.cursor()
-# update_db.update_pipeline()
+update_db.update_pipeline()
+
 #%% functions
 def get_fund_id():
     """

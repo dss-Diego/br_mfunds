@@ -136,7 +136,7 @@ def update_quotes():
     available_files = pd.DataFrame.from_dict(files, orient='index')
     new_files = available_files.merge(db_files, how='left', right_on='file_name', left_on='file_name')
     new_files = new_files.fillna(pd.to_datetime('1900-01-01'))
-    new_files = new_files[new_files['url_date'] > new_files['last_modified']]
+    new_files = new_files[new_files['url_date'] > pd.to_datetime(new_files['last_modified'])]
 
     for idx, file in new_files.iterrows():
         if len(file['file_name']) == 22:
@@ -172,7 +172,7 @@ def load_file(file_data, zip_or_csv):
 
     """
 
-    active = pd.read_sql("SELECT cnpj FROM inf_cadastral", db)['cnpj']
+    active = pd.read_sql("SELECT cnpj FROM inf_cadastral", conn)['cnpj']
 
     if zip_or_csv == 'zip':
         zip_file = zipfile.ZipFile(io.BytesIO(file_data))
@@ -195,7 +195,7 @@ def load_file(file_data, zip_or_csv):
                        WHERE SUBSTR(date, 1, 4) = '{year}' AND 
                              SUBSTR(date, 6, 2) = '{month}'""")
         df.to_sql('quotas', conn, if_exists='append', index=False)
-        db.commit()
+        # db.commit()
 
     return
 
@@ -231,6 +231,8 @@ def update_cdi():
     # check if the file is new, process and update files table
     for file in available_files:
         if file not in db_files:
+            for fl in os.listdir(os.path.join('data', 'temp')):
+                os.remove(os.path.join('data', 'temp', fl))
             file_url = f"ftp://ftp.cetip.com.br/MediaCDI/{file}"
             wget.download(file_url, os.path.join('data', 'temp'))
             with open(os.path.join('data', 'temp', file), 'r') as content:
@@ -245,7 +247,7 @@ def update_cdi():
             # Because of that, the last_modified is not important, and set to 1900-01-01
             db.execute(f"""INSERT INTO files 
                             VALUES ('{file}', '1900-01-01')""")
-            db.commit()
+            # db.commit()
             print("CDI file " + file + " downloaded successfully.")
     return
 
