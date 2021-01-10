@@ -100,6 +100,7 @@ def update_register():
     df[['taxa_perfm', 'taxa_adm']] = df[['taxa_perfm', 'taxa_adm']].fillna(value=0)
     db.execute("DELETE FROM inf_cadastral")
     df.to_sql('inf_cadastral', conn, if_exists='append', index=False)
+    conn.commit()
     return
 
 
@@ -195,7 +196,7 @@ def load_file(file_data, zip_or_csv):
                        WHERE SUBSTR(date, 1, 4) = '{year}' AND 
                              SUBSTR(date, 6, 2) = '{month}'""")
         df.to_sql('quotas', conn, if_exists='append', index=False)
-        # db.commit()
+        conn.commit()
 
     return
 
@@ -247,7 +248,7 @@ def update_cdi():
             # Because of that, the last_modified is not important, and set to 1900-01-01
             db.execute(f"""INSERT INTO files 
                             VALUES ('{file}', '1900-01-01')""")
-            # db.commit()
+            conn.commit()
             print("CDI file " + file + " downloaded successfully.")
     return
 
